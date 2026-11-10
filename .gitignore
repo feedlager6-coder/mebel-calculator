@@ -13,3 +13,9 @@ find_*.js
 build_*.js
 apply_*.js
 furniture_svgs.js
+
+deploy_*.js
+server.js
+*.ps1
+*.bat
+*.vbs
