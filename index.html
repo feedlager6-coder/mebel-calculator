@@ -2412,6 +2412,12 @@
         }
       } catch(e) {}
 
+      
+      // Загрузка GitHub токена в инпут
+      const savedGhToken = localStorage.getItem("mebel_github_token") || (appDb.config && appDb.config.githubToken) || "";
+      const ghInp = document.getElementById("githubTokenInput");
+      if (ghInp && savedGhToken) ghInp.value = savedGhToken;
+
       if (appDb.config && appDb.config.productionUrl) {
         document.getElementById("domainInput").value = appDb.config.productionUrl;
       }
@@ -2423,6 +2429,13 @@
       if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
         fetch("/api/vercel-status").then(r => r.json()).then(data => {
           if (data) {
+            
+            if (data.githubToken) {
+              const ghInp = document.getElementById("githubTokenInput");
+              if (ghInp && !ghInp.value) ghInp.value = data.githubToken;
+              try { localStorage.setItem("mebel_github_token", data.githubToken); } catch(e) {}
+            }
+
             if (data.selectelBucket && document.getElementById("selectelBucketInput")) {
               document.getElementById("selectelBucketInput").value = data.selectelBucket;
             }
