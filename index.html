@@ -61,6 +61,31 @@
   }
 }
 
+
+/* ИСКЛЮЧЕНИЕ ГОРИЗОНТАЛЬНОГО СКРОЛЛА: ТОЛЬКО ВПЕРЕД И ВНИЗ */
+html, body {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  position: relative !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  -webkit-text-size-adjust: 100% !important;
+}
+*, *::before, *::after {
+  box-sizing: border-box !important;
+}
+.hide-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+.hide-scroll {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+#view_admin, #view_landing, #view_calculator, #view_setup {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
 </style>
   <style>
     body {
@@ -267,8 +292,8 @@
       <div id="settingsDrawer" class="hidden bg-[#f5f5f7] border border-black/[0.06] rounded-2xl p-4 sm:p-5 space-y-4 text-xs">
         <div class="flex items-center justify-between border-b border-black/[0.06] pb-3">
           <div>
-            <div class="text-[12px] font-bold text-[#1d1d1f]">⚙️ Параметры публикации и облака (Selectel S3 РФ + Vercel)</div>
-            <div class="text-[11px] text-[#86868b] mt-0.5">Публикация клиентского калькулятора без аренды VPS прямо в российское S3-хранилище Selectel</div>
+            <div class="text-[12px] font-bold text-[#1d1d1f]">⚙️ Параметры публикации калькулятора (mebel-calc.ru)</div>
+            <div class="text-[11px] text-[#86868b] mt-0.5">Управление доменом и синхронизация цехов с GitHub Pages 24/7</div>
           </div>
           <button onclick="publishToVercelNow()" class="bg-[#0071e3] hover:bg-[#0077ed] text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 shrink-0">
             <span>🚀</span> Опубликовать сейчас
@@ -317,46 +342,7 @@
           </div>
         </div>
 
-        <!-- Секция Selectel S3 (Россия) -->
-        <div class="bg-white p-3.5 rounded-xl border border-emerald-200/60 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="text-base">🇷🇺</span>
-              <span class="font-bold text-emerald-900 text-[11.5px]">Selectel S3 Объектное хранилище (1 руб/мес, доступно в РФ без VPN)</span>
-            </div>
-            <span id="selectelStatusBadge" class="bg-slate-100 text-[#86868b] border border-black/[0.08] px-2 py-0.5 rounded-md text-[10px] font-semibold">Проверка...</span>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            <div>
-              <label class="block text-[10px] uppercase font-semibold text-[#86868b] mb-1">Имя бакета (Bucket Name)</label>
-              <input id="selectelBucketInput" type="text" placeholder="например: mebel-calc" class="w-full border border-black/[0.08] bg-[#fcfcfd] rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            </div>
-            <div>
-              <label class="block text-[10px] uppercase font-semibold text-[#86868b] mb-1">Ключ доступа (Access Key)</label>
-              <input id="selectelAccessKeyInput" type="text" placeholder="Selectel S3 Access Key" class="w-full border border-black/[0.08] bg-[#fcfcfd] rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            </div>
-            <div>
-              <label class="block text-[10px] uppercase font-semibold text-[#86868b] mb-1">Секретный ключ (Secret Key)</label>
-              <input id="selectelSecretKeyInput" type="password" placeholder="Selectel S3 Secret Key" class="w-full border border-black/[0.08] bg-[#fcfcfd] rounded-lg px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            </div>
-          </div>
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-            <span class="text-[10.5px] text-[#86868b]">Эндпоинт по умолчанию: <code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-[10px]">s3.ru-1.storage.selcloud.ru</code> (регион ru-1)</span>
-            <button onclick="saveSelectelConfig()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl font-semibold transition shrink-0 text-xs">💾 Сохранить Selectel S3</button>
-          </div>
-        </div>
-
-        <!-- Секция Vercel -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-black/[0.05] pt-2.5">
-          <div class="sm:w-1/3">
-            <span class="font-semibold text-[#1d1d1f]">🌍 Токен Vercel (Global Cloud):</span>
-            <div class="text-[10.5px] text-[#86868b]">Для зеркалирования на Vercel Edge Network</div>
-          </div>
-          <div class="flex items-center gap-2 w-full sm:w-auto flex-1 justify-end">
-            <input id="tokenInput" type="password" placeholder="vcp_..." class="w-full sm:w-80 border border-black/[0.08] bg-white rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-[#0071e3]" />
-            <button onclick="saveVercelToken()" class="bg-[#1d1d1f] hover:bg-black text-white px-3.5 py-1.5 rounded-xl font-semibold transition shrink-0">Обновить</button>
-          </div>
+        
         </div>
       </div>
 
@@ -382,17 +368,17 @@
     </header>
 
     <!-- СЕГМЕНТНЫЙ ПЕРЕКЛЮЧАТЕЛЬ APPLE -->
-    <div id="adminSegmentNav" class="bg-[#e8e8ed] p-1 rounded-2xl flex max-w-2xl mx-auto sm:mx-0 text-xs sm:text-sm font-medium text-[#86868b]">
-      <button onclick="switchAdminSegment('crm')" id="seg_crm" class="apple-segment-active flex-1 py-2 sm:py-2.5 rounded-xl transition text-center">
+    <div id="adminSegmentNav" class="bg-[#e8e8ed] p-1 rounded-2xl flex max-w-full overflow-x-auto hide-scroll gap-1 text-xs sm:text-sm font-medium text-[#86868b] select-none scroll-smooth">
+      <button onclick="switchAdminSegment('crm')" id="seg_crm" class="apple-segment-active shrink-0 sm:flex-1 py-2 px-3 sm:py-2.5 rounded-xl transition text-center">
         📊 Цеха
       </button>
-      <button onclick="switchAdminSegment('builder')" id="seg_builder" class="flex-1 py-2 sm:py-2.5 rounded-xl transition text-center hover:text-[#1d1d1f]">
-        ➕ Новый цех / Импорт
+      <button onclick="switchAdminSegment('builder')" id="seg_builder" class="shrink-0 sm:flex-1 py-2 px-3 sm:py-2.5 rounded-xl transition text-center hover:text-[#1d1d1f]">
+        ➕ Новый цех
       </button>
-      <button onclick="switchAdminSegment('sales')" id="seg_sales" class="flex-1 py-2 sm:py-2.5 rounded-xl transition text-center hover:text-[#1d1d1f]">
-        💬 Скрипты продаж
+      <button onclick="switchAdminSegment('sales')" id="seg_sales" class="shrink-0 sm:flex-1 py-2 px-3 sm:py-2.5 rounded-xl transition text-center hover:text-[#1d1d1f]">
+        💬 Скрипты
       </button>
-      <button onclick="switchAdminSegment('partners')" id="seg_partners" class="flex-1 py-2 sm:py-2.5 rounded-xl transition text-center hover:text-[#1d1d1f]">
+      <button onclick="switchAdminSegment('partners')" id="seg_partners" class="shrink-0 sm:flex-1 py-2 px-3 sm:py-2.5 rounded-xl transition text-center hover:text-[#1d1d1f]">
         🤝 Чаты и Авитологи
       </button>
     </div>
@@ -1046,7 +1032,13 @@
         </div>
 
         <!-- ТАБЛИЦА ЛИДОВ -->
-        <div class="overflow-x-auto rounded-2xl border border-black/[0.06] bg-white">
+        <!-- МОБИЛЬНЫЙ ВИД ЛИДОВ (КАРТОЧКИ APPLE) -->
+        <div id="avitolog_leads_cards" class="sm:hidden space-y-3">
+          <!-- Рендерится через renderAvitologLeads() -->
+        </div>
+
+        <!-- ДЕСКТОПНЫЙ ВИД (ТАБЛИЦА) -->
+        <div class="hidden sm:block overflow-x-auto rounded-2xl border border-black/[0.06] bg-white">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
               <tr class="bg-[#f5f5f7] text-[#86868b] border-b border-black/[0.06] font-semibold">
@@ -6584,6 +6576,35 @@ const isNone = type === "none" || calcActiveItem.hideBlueprint === true;
       renderPartnerChatsList(filtered);
     }
 
+    
+    // АВАТАР СООБЩЕСТВА С ИЗЯЩНЫМ SVG-ФОЛБЭКОМ (100% БЕЗ БИТЫХ КАРТИНОК)
+    function getChatAvatarHtml(chat) {
+      const isFurn = chat.category === "furniture";
+      const name = (chat.name || "").trim();
+      const parts = name.split(/\s+/).filter(Boolean);
+      const initials = parts.length >= 2 
+        ? (parts[0][0] + parts[1][0]).toUpperCase()
+        : (name.slice(0, 2) || "TG").toUpperCase();
+
+      const bgCol1 = isFurn ? "%23f59e0b" : "%230071e3";
+      const bgCol2 = isFurn ? "%23b45309" : "%230051a8";
+      const iconEmoji = isFurn ? "🪵" : "🚀";
+
+      const fallbackSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='" + bgCol1 + "'/><stop offset='100%' stop-color='" + bgCol2 + "'/></linearGradient></defs><rect width='80' height='80' rx='22' fill='url(%23g)'/><text x='40' y='48' font-family='-apple-system, sans-serif' font-size='26' font-weight='800' fill='white' text-anchor='middle'>" + initials + "</text></svg>";
+
+      if (chat.photo && typeof chat.photo === "string" && chat.photo.startsWith("http")) {
+        return '<div class="relative w-11 h-11 shrink-0 rounded-2xl overflow-hidden border border-black/[0.08] shadow-2xs bg-slate-100">' +
+          '<img src="' + chat.photo + '" alt="' + chat.handle + '" class="w-full h-full object-cover" onerror="this.onerror=null; this.src=\'' + fallbackSvg + '\';" />' +
+          '<span class="absolute -bottom-1 -right-1 text-[11px] leading-none">' + iconEmoji + '</span>' +
+        '</div>';
+      }
+
+      return '<div class="relative w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-tr ' + (isFurn ? 'from-amber-500 to-orange-600' : 'from-blue-600 to-indigo-600') + ' text-white flex items-center justify-center font-extrabold text-xs shadow-2xs border border-white/20 select-none">' +
+        '<span>' + initials + '</span>' +
+        '<span class="absolute -bottom-1 -right-1 text-[11px] leading-none">' + iconEmoji + '</span>' +
+      '</div>';
+    }
+
     function renderPartnerChatsList(customList = null) {
       const container = document.getElementById("partner_chats_container");
       if (!container) return;
@@ -6600,55 +6621,49 @@ const isNone = type === "none" || calcActiveItem.hideBlueprint === true;
       container.innerHTML = chats.map(chat => {
         const isFurn = chat.category === "furniture";
         const catBadge = isFurn
-          ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200/80">🪵 Мебельщики</span>'
-          : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-200/80">🚀 Авитологи</span>';
+          ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200/80 shrink-0">🪵 Мебель</span>'
+          : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-200/80 shrink-0">🚀 Авито</span>';
 
         const typeBadge = chat.type === "Чат"
-          ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/60">💬 Чат</span>'
-          : '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200/60">📢 Канал</span>';
+          ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/60 shrink-0">💬 Чат</span>'
+          : '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200/60 shrink-0">📢 Канал</span>';
 
-        const photoHtml = chat.photo
-          ? `<img src="${chat.photo}" alt="${chat.handle}" class="w-10 h-10 rounded-2xl object-cover shrink-0 border border-black/[0.06] shadow-2xs" onerror="this.outerHTML='<div class=\'w-10 h-10 rounded-2xl ${isFurn ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'} flex items-center justify-center font-bold text-sm shrink-0\'>${isFurn ? '🪵' : '🚀'}</div>'" />`
-          : `<div class="w-10 h-10 rounded-2xl ${isFurn ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'} flex items-center justify-center font-bold text-sm shrink-0">${isFurn ? '🪵' : '🚀'}</div>`;
-
+        const avatarHtml = getChatAvatarHtml(chat);
         const status = chat.status || "⚪ Не писал";
 
         return `
-          <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-black/[0.06] shadow-2xs hover:border-[#0071e3]/40 transition space-y-2.5">
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex items-start gap-3 min-w-0">
-                ${photoHtml}
-                <div class="min-w-0 space-y-0.5">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <h4 class="text-xs sm:text-sm font-bold text-[#1d1d1f] truncate">${chat.name}</h4>
-                    ${typeBadge}
-                    ${catBadge}
-                  </div>
-                  <div class="flex items-center gap-2 text-xs text-[#86868b]">
-                    <a href="${chat.url}" target="_blank" rel="noopener noreferrer" class="font-mono text-[#0071e3] hover:underline font-semibold">@${chat.handle}</a>
-                    <span>•</span>
-                    <span class="font-semibold text-[#1d1d1f]">${chat.membersText || (chat.membersCount + ' уч.')}</span>
-                  </div>
+          <div class="bg-white rounded-2xl p-3 sm:p-4 border border-black/[0.06] shadow-2xs hover:border-[#0071e3]/40 transition space-y-2.5 max-w-full overflow-hidden">
+            <div class="flex items-start gap-2.5 sm:gap-3">
+              ${avatarHtml}
+              <div class="min-w-0 flex-1 space-y-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <h4 class="text-xs sm:text-sm font-bold text-[#1d1d1f] break-words line-clamp-1">${chat.name}</h4>
+                  ${typeBadge}
+                  ${catBadge}
                 </div>
-              </div>
-
-              <!-- ДЕЙСТВИЕ -->
-              <div class="flex items-center gap-2 shrink-0">
-                <a href="${chat.url}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold bg-[#0071e3] hover:bg-[#0077ed] text-white px-3.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-2xs">
-                  <span>✈️ Открыть</span>
-                </a>
+                <div class="flex items-center gap-2 text-[11px] text-[#86868b] flex-wrap">
+                  <a href="${chat.url}" target="_blank" rel="noopener noreferrer" class="font-mono text-[#0071e3] hover:underline font-semibold">@${chat.handle}</a>
+                  <span>•</span>
+                  <span class="font-medium text-[#1d1d1f]">${chat.membersText || (chat.membersCount + ' уч.')}</span>
+                </div>
               </div>
             </div>
 
-            ${chat.description ? `<p class="text-[11px] text-[#86868b] leading-relaxed line-clamp-2 bg-[#f5f5f7]/60 p-2.5 rounded-xl border border-black/[0.03]">${chat.description}</p>` : ''}
+            ${chat.description ? `<p class="text-[11px] text-[#86868b] leading-snug line-clamp-2 bg-[#f5f5f7]/80 p-2.5 rounded-xl border border-black/[0.03] break-words">${chat.description}</p>` : ''}
 
-            <div class="flex items-center justify-between pt-1 border-t border-black/[0.04] text-xs">
-              <span class="text-[11px] text-[#86868b] font-medium">Статус контакта:</span>
-              <select onchange="updatePartnerChatStatus('${chat.handle}', this.value)" class="text-xs font-semibold bg-[#f5f5f7] border border-black/[0.06] rounded-xl px-2.5 py-1 text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]">
-                <option value="⚪ Не писал" ${status === '⚪ Не писал' ? 'selected' : ''}>⚪ Не писал</option>
-                <option value="🟡 Вступил / Наблюдаю" ${status.includes('Вступил') ? 'selected' : ''}>🟡 Вступил / Наблюдаю</option>
-                <option value="🟢 Опубликовал пост / Написал" ${status.includes('Опубликовал') ? 'selected' : ''}>🟢 Опубликовал пост / Написал</option>
-              </select>
+            <!-- НИЖНЯЯ ПАНЕЛЬ ДЕЙСТВИЙ: СТАТУС + КНОПКА ОТКРЫТИЯ -->
+            <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-black/[0.04] flex-wrap sm:flex-nowrap">
+              <div class="flex items-center gap-1.5 flex-1 min-w-[180px]">
+                <span class="text-[10px] text-[#86868b] font-medium shrink-0">Статус:</span>
+                <select onchange="updatePartnerChatStatus('${chat.handle}', this.value)" class="w-full text-xs font-semibold bg-[#f5f5f7] border border-black/[0.06] rounded-xl px-2.5 py-1 text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]">
+                  <option value="⚪ Не писал" ${status === '⚪ Не писал' ? 'selected' : ''}>⚪ Не писал</option>
+                  <option value="🟡 Вступил / Наблюдаю" ${status.includes('Вступил') ? 'selected' : ''}>🟡 Вступил</option>
+                  <option value="🟢 Опубликовал пост / Написал" ${status.includes('Опубликовал') ? 'selected' : ''}>🟢 Опубликовал</option>
+                </select>
+              </div>
+              <a href="${chat.url}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold bg-[#0071e3] hover:bg-[#0077ed] text-white px-3.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-2xs shrink-0 ml-auto">
+                <span>✈️ Открыть</span>
+              </a>
             </div>
           </div>
         `;
@@ -6679,15 +6694,16 @@ const isNone = type === "none" || calcActiveItem.hideBlueprint === true;
       }
     }
 
+    
     function renderAvitologLeads() {
       const tbody = document.getElementById("avitolog_leads_tbody");
-      if (!tbody) return;
+      const cardsContainer = document.getElementById("avitolog_leads_cards");
 
       const leads = (appDb && appDb.avitologLeads && appDb.avitologLeads.length > 0)
         ? appDb.avitologLeads
         : (window.AVITOLOG_LEADS || []);
 
-      // Update counters
+      // Обновление счетчиков
       const totalEl = document.getElementById("stat_leads_total");
       const t1El = document.getElementById("stat_leads_touch1");
       const demoEl = document.getElementById("stat_leads_demo");
@@ -6699,49 +6715,97 @@ const isNone = type === "none" || calcActiveItem.hideBlueprint === true;
       if (partEl) partEl.innerText = leads.filter(l => l.status && l.status.includes("Партнер")).length;
 
       if (leads.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-xs text-[#86868b]">В трекере пока нет добавленных авитологов. Нажмите «+ Добавить авитолога», чтобы начать вести переговоры.</td></tr>';
+        const emptyMsg = '<div class="p-6 text-center text-xs text-[#86868b] bg-[#f5f5f7] rounded-2xl border border-black/[0.04]">В трекере пока нет добавленных авитологов. Нажмите «+ Добавить авитолога», чтобы начать переговоры.</div>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-xs text-[#86868b]">В трекере пока нет добавленных авитологов.</td></tr>';
+        if (cardsContainer) cardsContainer.innerHTML = emptyMsg;
         return;
       }
 
-      tbody.innerHTML = leads.map(l => {
-        const contactUrl = (l.contact || "").startsWith("http")
-          ? l.contact
-          : ((l.contact || "").startsWith("@") ? `https://t.me/${l.contact.replace('@', '')}` : `https://t.me/${l.contact}`);
+      // 1. МОБИЛЬНЫЙ РЕНДЕР КАРТОЧКАМИ APPLE
+      if (cardsContainer) {
+        cardsContainer.innerHTML = leads.map(l => {
+          const contactUrl = (l.contact || "").startsWith("http")
+            ? l.contact
+            : ((l.contact || "").startsWith("@") ? "https://t.me/" + l.contact.replace('@', '') : "https://t.me/" + l.contact);
 
-        return `
-          <tr class="hover:bg-[#f5f5f7]/50 transition">
-            <td class="p-3 font-bold text-[#1d1d1f]">
-              <div>${l.name}</div>
-              <div class="text-[10px] text-[#86868b] font-normal">${l.updatedAt || 'Сегодня'}</div>
-            </td>
-            <td class="p-3">
-              <a href="${contactUrl}" target="_blank" rel="noopener noreferrer" class="text-[#0071e3] hover:underline font-mono font-medium flex items-center gap-1">
-                <span>${l.contact}</span>
-                <span class="text-[10px]">↗</span>
-              </a>
-            </td>
-            <td class="p-3 font-semibold text-[#1d1d1f]">
-              <span class="px-2 py-0.5 rounded-md bg-[#f5f5f7] border border-black/[0.04]">${l.workshopsCount || 1} цехов</span>
-            </td>
-            <td class="p-3">
-              <select onchange="updateAvitologLeadStatus('${l.id}', this.value)" class="text-xs font-semibold bg-[#f5f5f7] border border-black/[0.06] rounded-xl px-2 py-1 text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]">
-                <option value="Написал 1-е касание" ${l.status === 'Написал 1-е касание' ? 'selected' : ''}>⚪ 1-е касание</option>
-                <option value="Скинул демо" ${l.status === 'Скинул демо' ? 'selected' : ''}>🟡 Скинул демо</option>
-                <option value="Тестируем на клиенте" ${l.status === 'Тестируем на клиенте' ? 'selected' : ''}>🟠 Тестируем</option>
-                <option value="Партнер (активен)" ${l.status === 'Партнер (активен)' ? 'selected' : ''}>🟢 Партнер</option>
-              </select>
-            </td>
-            <td class="p-3 text-[11px] text-[#86868b] max-w-xs truncate" title="${l.notes || ''}">
-              ${l.notes || '—'}
-            </td>
-            <td class="p-3 text-right">
-              <button onclick="deleteAvitologLead('${l.id}')" title="Удалить контакт" class="text-[#86868b] hover:text-red-600 transition p-1 text-sm font-bold">
-                ✕
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
+          return `
+            <div class="apple-card rounded-2xl p-3.5 space-y-2.5 max-w-full overflow-hidden border border-black/[0.06]">
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <div class="font-bold text-sm text-[#1d1d1f]">${l.name}</div>
+                  <div class="text-[10px] text-[#86868b]">${l.updatedAt || 'Сегодня'}</div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-[#0071e3] border border-blue-200/60">${l.workshopsCount || 1} цехов</span>
+                  <button onclick="deleteAvitologLead('${l.id}')" title="Удалить" class="text-[#86868b] hover:text-red-600 p-1 font-bold text-sm">✕</button>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 text-xs">
+                <a href="${contactUrl}" target="_blank" rel="noopener noreferrer" class="text-[#0071e3] hover:underline font-mono font-semibold flex items-center gap-1 truncate">
+                  <span>${l.contact}</span>
+                  <span class="text-[10px]">↗</span>
+                </a>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block text-[10px] uppercase font-bold text-[#86868b]">Статус воронки:</label>
+                <select onchange="updateAvitologLeadStatus('${l.id}', this.value)" class="w-full text-xs font-semibold bg-[#f5f5f7] border border-black/[0.06] rounded-xl px-2.5 py-1.5 text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]">
+                  <option value="Написал 1-е касание" ${l.status === 'Написал 1-е касание' ? 'selected' : ''}>⚪ 1-е касание</option>
+                  <option value="Скинул демо" ${l.status === 'Скинул демо' ? 'selected' : ''}>🟡 Скинул демо</option>
+                  <option value="Тестируем на клиенте" ${l.status === 'Тестируем на клиенте' ? 'selected' : ''}>🟠 Тестируем</option>
+                  <option value="Партнер (активен)" ${l.status === 'Партнер (активен)' ? 'selected' : ''}>🟢 Партнер</option>
+                </select>
+              </div>
+
+              ${l.notes ? `<div class="text-[11px] text-[#86868b] bg-[#f5f5f7]/70 p-2 rounded-xl break-words">${l.notes}</div>` : ''}
+            </div>
+          `;
+        }).join("");
+      }
+
+      // 2. ДЕСКТОПНЫЙ РЕНДЕР ТАБЛИЦЕЙ (ДЛЯ ПК)
+      if (tbody) {
+        tbody.innerHTML = leads.map(l => {
+          const contactUrl = (l.contact || "").startsWith("http")
+            ? l.contact
+            : ((l.contact || "").startsWith("@") ? "https://t.me/" + l.contact.replace('@', '') : "https://t.me/" + l.contact);
+
+          return `
+            <tr class="hover:bg-[#f5f5f7]/50 transition">
+              <td class="p-3 font-bold text-[#1d1d1f]">
+                <div>${l.name}</div>
+                <div class="text-[10px] text-[#86868b] font-normal">${l.updatedAt || 'Сегодня'}</div>
+              </td>
+              <td class="p-3">
+                <a href="${contactUrl}" target="_blank" rel="noopener noreferrer" class="text-[#0071e3] hover:underline font-mono font-medium flex items-center gap-1">
+                  <span>${l.contact}</span>
+                  <span class="text-[10px]">↗</span>
+                </a>
+              </td>
+              <td class="p-3 font-semibold text-[#1d1d1f]">
+                <span class="px-2 py-0.5 rounded-md bg-[#f5f5f7] border border-black/[0.04]">${l.workshopsCount || 1} цехов</span>
+              </td>
+              <td class="p-3">
+                <select onchange="updateAvitologLeadStatus('${l.id}', this.value)" class="text-xs font-semibold bg-[#f5f5f7] border border-black/[0.06] rounded-xl px-2 py-1 text-[#1d1d1f] focus:outline-none focus:ring-2 focus:ring-[#0071e3]">
+                  <option value="Написал 1-е касание" ${l.status === 'Написал 1-е касание' ? 'selected' : ''}>⚪ 1-е касание</option>
+                  <option value="Скинул демо" ${l.status === 'Скинул демо' ? 'selected' : ''}>🟡 Скинул демо</option>
+                  <option value="Тестируем на клиенте" ${l.status === 'Тестируем на клиенте' ? 'selected' : ''}>🟠 Тестируем</option>
+                  <option value="Партнер (активен)" ${l.status === 'Партнер (активен)' ? 'selected' : ''}>🟢 Партнер</option>
+                </select>
+              </td>
+              <td class="p-3 text-[11px] text-[#86868b] max-w-xs truncate" title="${l.notes || ''}">
+                ${l.notes || '—'}
+              </td>
+              <td class="p-3 text-right">
+                <button onclick="deleteAvitologLead('${l.id}')" title="Удалить контакт" class="text-[#86868b] hover:text-red-600 transition p-1 text-sm font-bold">
+                  ✕
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
     }
 
     function openAddAvitologModal() {
