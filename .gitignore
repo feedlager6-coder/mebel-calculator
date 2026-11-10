@@ -1,0 +1,15 @@
+node_modules/
+.env*
+vercel_secret.json
+*.log
+deploy_payload.json
+scratch/
+check_*.js
+update_*.js
+test_*.js
+replace_*.js
+inspect_*.js
+find_*.js
+build_*.js
+apply_*.js
+furniture_svgs.js
