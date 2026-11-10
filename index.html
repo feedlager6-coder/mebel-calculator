@@ -265,7 +265,7 @@ html, body {
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-[#34c759] shadow-xs shrink-0"></span>
             <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-[#1d1d1f] truncate">МебельCRM</h1>
-            <span class="text-[10px] sm:text-xs font-semibold bg-[#e8e8ed] text-[#86868b] px-2.5 py-0.5 rounded-full shrink-0">В сети</span>
+            <span class="text-[10px] sm:text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full shrink-0 font-bold">mebel-calc.ru</span>
           </div>
           <p class="text-xs text-[#86868b] mt-1 font-normal line-clamp-1">
             Управление цехами, калькуляторами и клиентами с Авито
@@ -276,14 +276,37 @@ html, body {
           <button onclick="syncWorkshopsFromCloud()" title="Синхронизировать базу цехов с облаком" class="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#f5f5f7] hover:bg-[#e8e8ed] text-[#1d1d1f] px-3 py-2 rounded-xl transition border border-black/[0.06] active:scale-95">
             <span>🔄 Обновить</span>
           </button>
-          <button onclick="publishToVercelNow()" title="Опубликовать все изменения на Vercel" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold bg-[#1d1d1f] hover:bg-black active:scale-95 text-white px-3.5 py-2 rounded-xl transition shadow-xs">
-            <span>🚀 В облако Vercel</span>
-          </button>
           <button onclick="toggleSettingsDrawer()" title="Настройки системы" class="w-9 h-9 rounded-full bg-[#f5f5f7] hover:bg-[#e8e8ed] active:scale-95 flex items-center justify-center text-sm text-[#86868b] transition shrink-0">
             ⚙️
           </button>
           <button onclick="logoutAdmin()" title="Выйти из режима администратора" class="text-xs font-semibold text-[#86868b] hover:text-rose-600 transition px-2 py-1.5 rounded-lg hover:bg-black/[0.04]">
             Выйти
+          </button>
+        </div>
+      </div>
+
+      <!-- ИНДИКАТОР ОБЛАКА, МЕТКА ИЗМЕНЕНИЙ И КНОПКА ПРИМЕНЕНИЯ (ВИДНЫ НА ВСЕХ УСТРОЙСТВАХ 24/7) -->
+      <div id="crm_sync_bar" class="p-3 sm:p-4 rounded-2xl bg-white border border-black/[0.08] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2.5 flex-wrap min-w-0">
+          <span id="sync_status_dot" class="w-3 h-3 rounded-full bg-[#34c759] shadow-[0_0_10px_rgba(52,199,89,0.8)] shrink-0"></span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="sync_status_title" class="font-bold text-[#1d1d1f]">Облако актуально (GitHub Pages)</span>
+              <span id="sync_pending_pill" class="hidden px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold uppercase tracking-wide animate-pulse">
+                ⚠️ Есть изменения цеха!
+              </span>
+            </div>
+            <div class="text-[11px] text-[#86868b] flex items-center gap-1.5 mt-0.5 flex-wrap">
+              <span>🕒 Последний деплой:</span>
+              <strong id="sync_last_deploy_time" class="text-[#1d1d1f] font-mono">загрузка даты...</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-stretch sm:self-auto shrink-0">
+          <button id="btn_apply_changes" onclick="triggerCloudDeploy()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0071e3] hover:bg-[#0077ed] active:scale-95 text-white font-bold py-2.5 px-4 rounded-xl shadow-xs transition text-xs">
+            <span id="btn_apply_changes_icon">🚀</span>
+            <span id="btn_apply_changes_text">Применить и опубликовать</span>
           </button>
         </div>
       </div>
@@ -1898,7 +1921,7 @@ html, body {
       if (!t) {
         t = document.createElement("div");
         t.id = "appleToast";
-        t.className = "fixed top-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl bg-black/85 text-white text-xs font-semibold backdrop-blur-md shadow-xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2 max-w-sm text-center";
+        t.className = "fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-[#1d1d1f]/95 text-white text-xs font-bold backdrop-blur-md shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2.5 max-w-sm text-center border border-white/10";
         document.body.appendChild(t);
       }
       t.innerHTML = text;
@@ -2430,9 +2453,181 @@ html, body {
         }
       } catch(e) {}
 
+
+    // ==========================================
+    // СИСТЕМА УЧЕТА ИЗМЕНЕНИЙ И ВРЕМЕНИ ДЕПЛОЯ (APPLE STYLE)
+    // ==========================================
+    window.hasPendingChanges = false;
+
+    function markPendingChanges(isChanged = true) {
+      window.hasPendingChanges = isChanged;
+      const pill = document.getElementById("sync_pending_pill");
+      const dot = document.getElementById("sync_status_dot");
+      const title = document.getElementById("sync_status_title");
+      const btn = document.getElementById("btn_apply_changes");
+
+      if (isChanged) {
+        if (pill) pill.classList.remove("hidden");
+        if (dot) {
+          dot.className = "w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.9)] shrink-0 animate-pulse";
+        }
+        if (title) title.textContent = "Есть изменения цеха! Нажмите «Применить»";
+        if (btn) {
+          btn.className = "w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#ff9500] hover:bg-[#e08500] active:scale-95 text-white font-extrabold py-2.5 px-4 rounded-xl shadow-md transition text-xs";
+        }
+      } else {
+        if (pill) pill.classList.add("hidden");
+        if (dot) {
+          dot.className = "w-3 h-3 rounded-full bg-[#34c759] shadow-[0_0_10px_rgba(52,199,89,0.8)] shrink-0";
+        }
+        if (title) title.textContent = "Облако актуально (GitHub Pages)";
+        if (btn) {
+          btn.className = "w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0071e3] hover:bg-[#0077ed] active:scale-95 text-white font-bold py-2.5 px-4 rounded-xl shadow-xs transition text-xs";
+        }
+      }
+    }
+
+    async function refreshLastDeployTime() {
+      const el = document.getElementById("sync_last_deploy_time");
+      try {
+        const token = getActiveGitHubToken();
+        const headers = { "Accept": "application/vnd.github.v3+json" };
+        if (token) headers["Authorization"] = "token " + token;
+
+        const url = "https://api.github.com/repos/" + GITHUB_REPO_OWNER + "/" + GITHUB_REPO_NAME + "/commits/main?t=" + Date.now();
+        const res = await fetch(url, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.commit && data.commit.author && data.commit.author.date) {
+            const d = new Date(data.commit.author.date);
+            const formatted = d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + ", " +
+              d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+            if (el) el.textContent = formatted;
+            try { localStorage.setItem("mebel_last_deploy_time", formatted); } catch (e) {}
+            return formatted;
+          }
+        }
+      } catch (err) {
+        console.warn("Не удалось получить дату коммита GitHub:", err);
+      }
+
+      const cached = localStorage.getItem("mebel_last_deploy_time") || (new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + ", " + new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }));
+      if (el) el.textContent = cached;
+      return cached;
+    }
+
+    async function triggerCloudDeploy() {
+      const btn = document.getElementById("btn_apply_changes");
+      const icon = document.getElementById("btn_apply_changes_icon");
+      const text = document.getElementById("btn_apply_changes_text");
+
+      if (btn) btn.disabled = true;
+      if (icon) icon.textContent = "⏳";
+      if (text) text.textContent = "Публикация в GitHub...";
+      showToast("⏳ Применение изменений и отправка в GitHub Pages...", 20000);
+
+      try {
+        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+          const res = await fetch("/api/deploy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ adminKey: "yusup2026", workshops: appDb.workshops, config: appDb.config })
+          });
+          const json = await res.json();
+          if (!json.ok) throw new Error(json.error || "Ошибка локального деплоя");
+        } else {
+          await deployDirectToGitHub();
+        }
+
+        markPendingChanges(false);
+        const deployTime = await refreshLastDeployTime();
+
+        // Показываем красивое центрированное модальное окно успеха
+        showSaveSuccessModal(deployTime);
+        showToast("✓ Изменения применены в GitHub! Доступно по ссылке через 15–20 сек.", 8000);
+      } catch (err) {
+        console.error("Ошибка применения изменений:", err);
+        showToast("⚠️ Ошибка публикации в GitHub: " + err.message, 8000);
+      } finally {
+        if (btn) btn.disabled = false;
+        if (icon) icon.textContent = "🚀";
+        if (text) text.textContent = "Применить и опубликовать";
+      }
+    }
+
+    function showSaveSuccessModal(deployTime, shopId = "") {
+      let modal = document.getElementById("modal_save_success");
+      if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "modal_save_success";
+        modal.className = "fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4";
+        modal.innerHTML = `
+          <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-black/[0.08] text-center space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-[#34c759] flex items-center justify-center text-3xl font-extrabold shadow-xs">
+              ✓
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-base font-extrabold text-[#1d1d1f]">Изменения успешно применены!</h3>
+              <p class="text-xs text-[#86868b]">Цех обновлен и опубликован на mebel-calc.ru</p>
+            </div>
+            <div class="p-3.5 bg-[#f5f5f7] rounded-2xl text-xs space-y-2 text-left border border-black/[0.04]">
+              <div class="flex items-center justify-between text-[#86868b]">
+                <span>🕒 Время деплоя:</span>
+                <strong id="modal_deploy_timestamp" class="text-[#1d1d1f]"></strong>
+              </div>
+              <div class="flex items-center justify-between text-[#86868b]">
+                <span>🌐 Адрес ссылки:</span>
+                <span id="modal_deploy_shop_url" class="font-mono text-[#0071e3] font-bold truncate max-w-[170px]"></span>
+              </div>
+            </div>
+            <div class="space-y-2 pt-1">
+              <a id="modal_open_calc_link" href="#" target="_blank" class="w-full bg-[#0071e3] hover:bg-[#0077ed] text-white font-bold py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs transition active:scale-95">
+                <span>👁️</span> Открыть калькулятор цеха
+              </a>
+              <button onclick="closeSaveSuccessModal()" class="w-full bg-[#f5f5f7] hover:bg-[#e8e8ed] text-[#1d1d1f] font-semibold py-2.5 px-4 rounded-xl text-xs transition">
+                Закрыть и остаться в CRM
+              </button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+
+      const activeShopId = shopId || (document.getElementById("form_id") ? document.getElementById("form_id").value.trim().toLowerCase() : "") || "mebelkraft";
+      const domain = getActiveDomain();
+      const liveUrl = `${domain}/${activeShopId}`;
+
+      const tsEl = modal.querySelector("#modal_deploy_timestamp");
+      if (tsEl) tsEl.textContent = deployTime || new Date().toLocaleTimeString("ru-RU");
+
+      const urlEl = modal.querySelector("#modal_deploy_shop_url");
+      if (urlEl) urlEl.textContent = `${domain.replace(/^https?:\/\//, '')}/${activeShopId}`;
+
+      const linkEl = modal.querySelector("#modal_open_calc_link");
+      if (linkEl) linkEl.href = liveUrl;
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeSaveSuccessModal() {
+      const modal = document.getElementById("modal_save_success");
+      if (modal) modal.classList.add("hidden");
+    }
+
     function initAdminCRM() {
       renderStats();
       renderCrmList();
+      refreshLastDeployTime();
+
+      // Слушатель изменений в конструкторе цеха для метки "Есть изменения!"
+      try {
+        const bPanel = document.getElementById("panel_builder");
+        if (bPanel && !bPanel.dataset.listenerAttached) {
+          bPanel.dataset.listenerAttached = "true";
+          bPanel.addEventListener("input", () => markPendingChanges(true));
+          bPanel.addEventListener("change", () => markPendingChanges(true));
+        }
+      } catch (e) {}
 
       // Обновляем ссылку букмарклета с актуальным доменом
       try {
@@ -2671,6 +2866,7 @@ html, body {
     }
 
     async function toggleShopActive(id) {
+      markPendingChanges(true);
       if (!appDb.workshops[id]) return;
       const current = appDb.workshops[id].isActive !== false;
       appDb.workshops[id].isActive = !current;
@@ -2693,6 +2889,7 @@ html, body {
     }
 
     async function updateShopStatus(id, newStatus) {
+      markPendingChanges(true);
       if (!appDb.workshops[id]) return;
       appDb.workshops[id].status = newStatus;
 
@@ -2713,6 +2910,7 @@ html, body {
     }
 
     async function updateShopFee(id, newFee) {
+      markPendingChanges(true);
       if (!appDb.workshops[id]) return;
       appDb.workshops[id].serviceFee = Number(newFee) || 6000;
 
@@ -2758,6 +2956,7 @@ html, body {
     }
 
     async function deleteShopRecord(id) {
+      markPendingChanges(true);
       if (!confirm(`Удалить цех ${id}?`)) return;
       delete appDb.workshops[id];
 
@@ -4045,28 +4244,47 @@ html, body {
         localStorage.setItem("mebel_workshops", JSON.stringify(appDb.workshops));
       } catch (e) {}
 
-      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-        try {
+      const saveBtn = document.querySelector("button[onclick*='saveWorkshopFromBuilder']");
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.dataset.origHtml = saveBtn.innerHTML;
+        saveBtn.innerHTML = `<span class="animate-spin inline-block mr-1">⏳</span> <span>Сохранение и отправка в GitHub...</span>`;
+      }
+
+      showToast("⏳ Сохранение цеха в GitHub Pages...", 15000);
+
+      try {
+        if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
           await fetch("/api/save-shop", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newShop)
           });
-        } catch (e) {}
-        if (alsoDeploy) {
-          await publishToVercelNow();
+          if (alsoDeploy) {
+            await fetch("/api/deploy", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ adminKey: "yusup2026", workshops: appDb.workshops, config: appDb.config })
+            });
+          }
         } else {
-          showToast("✓ Цех успешно сохранен локально!");
-        }
-      } else {
-        // На смартфоне: сохраняем напрямую в GitHub!
-        try {
-          showToast("⏳ Сохранение цеха в GitHub Pages с телефона...", 15000);
+          // На смартфоне: сохраняем напрямую в GitHub!
           await deployDirectToGitHub();
-          showToast("✓ Цех успешно сохранен и опубликован в GitHub! Доступен по ссылке через 15–20 секунд.", 8000);
-        } catch (ghErr) {
-          console.error("Ошибка сохранения в GitHub со смартфона:", ghErr);
-          showToast("⚠️ Ошибка сохранения в GitHub: " + ghErr.message, 7000);
+        }
+
+        markPendingChanges(false);
+        const deployTime = await refreshLastDeployTime();
+
+        // Показываем красивое центрированное модальное окно успеха с прямой ссылкой
+        showSaveSuccessModal(deployTime, id);
+        showToast(`✓ Цех «${name}» успешно сохранен и опубликован!`, 7000);
+      } catch (ghErr) {
+        console.error("Ошибка сохранения в GitHub:", ghErr);
+        showToast("⚠️ Ошибка сохранения в GitHub: " + ghErr.message, 8000);
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          if (saveBtn.dataset.origHtml) saveBtn.innerHTML = saveBtn.dataset.origHtml;
         }
       }
 
