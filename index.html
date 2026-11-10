@@ -26,6 +26,41 @@
   display: block !important;
 }
 
+
+/* ИСПРАВЛЕНИЕ РАЗМЕРОВ КАРТОЧЕК И ФОТОГРАФИЙ (НЕ РАСТЯГИВАТЬСЯ) */
+.catalog-model-card {
+  width: 115px !important;
+  min-width: 115px !important;
+  max-width: 115px !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+.catalog-model-thumb {
+  width: 100% !important;
+  height: 72px !important;
+  max-height: 72px !important;
+  object-fit: cover !important;
+  border-radius: 12px !important;
+  display: block !important;
+}
+#calc_itemImg {
+  width: 120px !important;
+  height: 120px !important;
+  min-width: 120px !important;
+  min-height: 120px !important;
+  object-fit: cover !important;
+  border-radius: 16px !important;
+  display: block !important;
+}
+@media (min-width: 640px) {
+  #calc_itemImg {
+    width: 140px !important;
+    height: 140px !important;
+    min-width: 140px !important;
+    min-height: 140px !important;
+  }
+}
+
 </style>
   <style>
     body {
@@ -4548,10 +4583,10 @@ function applyImportCode() {
       cards.forEach(card => {
         const isSel = card.dataset.itemId === calcActiveItem.id;
         if (isSel) {
-          card.className = "shrink-0 w-36 sm:w-40 bg-white rounded-2xl p-2.5 border-2 border-[#0071e3] shadow-md ring-2 ring-[#0071e3]/20 transition cursor-pointer select-none";
+          card.className = "catalog-model-card bg-white rounded-2xl p-2 border-2 border-[#0071e3] shadow-md ring-2 ring-[#0071e3]/20 transition cursor-pointer select-none";
           card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
         } else {
-          card.className = "shrink-0 w-36 sm:w-40 bg-white rounded-2xl p-2.5 border border-black/[0.06] hover:border-black/[0.15] transition cursor-pointer select-none";
+          card.className = "catalog-model-card bg-white rounded-2xl p-2 border border-black/[0.06] hover:border-black/[0.15] transition cursor-pointer select-none";
         }
       });
     }
