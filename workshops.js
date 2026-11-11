@@ -1,8 +1,8 @@
 window.APP_CONFIG = {
   "productionUrl": "https://mebel-calc.ru",
   "defaultPriceRub": 6000,
-  "lastDeployedAt": "11.11.2026, 14:17:40",
-  "updatedTimestamp": 1794395860782
+  "lastDeployedAt": "11.11.2026, 16:05:54",
+  "updatedTimestamp": 1794402354019
 };
 
 window.WORKSHOPS_DB = {
@@ -377,20 +377,24 @@ window.WORKSHOPS_DB = {
     "leadTime": "7–10 дней",
     "warranty": "10 лет расширенной гарантии от завода (проверка мобильного сохранения)",
     "perks": [
+      "Бесплатный 3D-замер",
+      "Собственное ЧПУ",
+      "По договору",
       "Рассрочка 0%",
       "Бесплатный 3D-проект",
+      "Доставка и сборка",
       "Собственное производство",
       "Фурнитура Blum / Boyard"
     ],
     "status": "paid",
     "serviceFee": 6000,
     "paymentModel": "one_time",
-    "giftBonus": "🎁 Бонус за расчет: Скидка 10% на каменную мойку или петли с доводчиками в подарок!",
+    "giftBonus": "Бонус за расчет: Скидка 10% на каменную мойку или петли с доводчиками в подарок!",
     "leadsCount": 18,
     "leadsVolumeRub": 640000,
     "isActive": true,
     "updatedAt": "2026-11-11",
-    "updatedTimestamp": 1794395860782,
+    "updatedTimestamp": 1794402354017,
     "avitoClientId": "",
     "avitoClientSecret": "",
     "avitoUserId": "",
