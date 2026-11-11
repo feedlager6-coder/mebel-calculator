@@ -1,6 +1,8 @@
 window.APP_CONFIG = {
   "productionUrl": "https://mebel-calc.ru",
-  "defaultPriceRub": 6000
+  "defaultPriceRub": 6000,
+  "lastDeployedAt": "11.11.2026, 14:17:40",
+  "updatedTimestamp": 1794395860782
 };
 
 window.WORKSHOPS_DB = {
@@ -388,7 +390,7 @@ window.WORKSHOPS_DB = {
     "leadsVolumeRub": 640000,
     "isActive": true,
     "updatedAt": "2026-11-11",
-    "updatedTimestamp": 1794395681032,
+    "updatedTimestamp": 1794395860782,
     "avitoClientId": "",
     "avitoClientSecret": "",
     "avitoUserId": "",
@@ -639,7 +641,7 @@ window.WORKSHOPS_DB = {
   }
 };
 
-window.PARTNER_CHATS = [
+window.TG_PARTNER_CHATS = [
   {
     "handle": "avito_b2b",
     "name": "Авито для бизнеса ✔",
@@ -710,7 +712,7 @@ window.PARTNER_CHATS = [
     "membersText": "18 296 members, 1 529 online",
     "description": "Сообщество для обсуждения продвижения и продаж на Avito. Здесь делимся кейсами, обсуждаем алгоритмы платформы, тестируем инструменты и эффективные тактики для роста.  💰 Реклама и сотрудничество: @...",
     "photo": "https://cdn4.telesco.pe/file/TOas5tm0UUZA3j5npf71oWE9zYISfEGj0JuROkVPwvBj2OcAINPpl_j3XudbAsIKxAUP3cETPdA8DXluFFZtZgth6NGasxisjWtJl60vdVKw7cxSHticEQPqJu1TJg45Do1c7Qa6jlf074IV-1TaFXpHiqg1ZohtTo5smAw8oaaDMo_Hq9Q8MlC1rhvyjTv3FRE6sPGj4UK2GtXYLkDiD0ZQdPEs3TO7XEdPA6IDiWQpD_LAQR5kmHj-SfknYLN5mRvgYrizKoDpoIzXH5dV6vBqkLHQtgXBJeucbpC2iM1Hy3zj2ltRJ_YnTG_z196Q7uK87S870CNSUbd2Hn-7Qw.jpg",
-    "status": "🟡 Вступил / Наблюдаю"
+    "status": "⚪ Не писал"
   },
   {
     "handle": "avito_secrets",
