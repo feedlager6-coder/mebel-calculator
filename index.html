@@ -105,7 +105,8 @@ html, body {
   gap: 8px !important;
   overflow-x: auto !important;
   padding-top: 6px !important;
-  padding-bottom: 2px !important;
+  padding-bottom: 6px !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 #calc_itemThumbnails img {
   width: 52px !important;
@@ -115,8 +116,18 @@ html, body {
   min-height: 52px !important;
   max-height: 52px !important;
   object-fit: cover !important;
-  border-radius: 10px !important;
+  border-radius: 12px !important;
   flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition: all 0.2s ease !important;
+}
+#calc_itemThumbnails img.active-thumb,
+#calc_itemThumbnails img[class*="border-[#0071e3]"] {
+  border: 2px solid #0071e3 !important;
+  box-shadow: 0 0 0 1px #ffffff, 0 1px 6px rgba(0, 113, 227, 0.3) !important;
 }
 
 /* 2. Главное фото выбранного товара и бейдж "🔍 фото" строго внутри угла */
@@ -125,17 +136,27 @@ html, body {
   width: 112px !important;
   height: 112px !important;
   min-width: 112px !important;
+  max-width: 112px !important;
   min-height: 112px !important;
+  max-height: 112px !important;
   flex-shrink: 0 !important;
   overflow: hidden !important;
   border-radius: 16px !important;
+  box-sizing: border-box !important;
 }
 #calc_itemImg {
   width: 100% !important;
   height: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
   object-fit: cover !important;
   border-radius: 16px !important;
   display: block !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 #calc_photoWrapper span {
   position: absolute !important;
@@ -144,7 +165,7 @@ html, body {
   z-index: 5 !important;
 }
 
-/* 3. Карточки в горизонтальной ленте каталога — аккуратная ОДИНАРНАЯ рамка и удобная ширина 134px */
+/* 3. Карточки в горизонтальной ленте каталога — аккуратная ОДИНАРНАЯ рамка, ширина 134px, фото строго внутри */
 .catalog-model-card {
   width: 134px !important;
   min-width: 134px !important;
@@ -154,19 +175,25 @@ html, body {
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
   background: #ffffff !important;
+  overflow: hidden !important;
 }
 .catalog-model-card img,
 .catalog-model-thumb {
   width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
   height: 84px !important;
   min-height: 84px !important;
   max-height: 84px !important;
   object-fit: cover !important;
   border-radius: 12px !important;
-  border: 1px solid rgba(0,0,0,0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
   outline: none !important;
   box-shadow: none !important;
   display: block !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* 4. Защита 3D-чертежа от синего системного выделения на смартфонах */
@@ -5186,7 +5213,8 @@ function applyImportCode() {
     function updateCatalogSelection() {
       const container = document.getElementById("calc_catalogList");
       if (!container || !calcActiveItem) return;
-      const cards = container.querySelectorAll("[data-item-id]");
+      // Выбираем СТРОГО только родительские контейнеры карточек (div), никогда не затрагивая img внутри
+      const cards = container.querySelectorAll("div.catalog-model-card");
       cards.forEach(card => {
         const isSel = card.dataset.itemId === calcActiveItem.id;
         if (isSel) {
@@ -5368,7 +5396,7 @@ function applyImportCode() {
         const img = hasPhoto ? it.images[0] : "";
 
         const photoHtml = hasPhoto
-          ? `<img src="${sanitizeAvitoImageUrl(img)}" alt="${it.title}" class="catalog-model-thumb bg-slate-100" data-item-id="${it.id}" data-category="${it.category || 'shkafy'}" onerror="handleImgError(this, '${it.id}')" />`
+          ? `<img src="${sanitizeAvitoImageUrl(img)}" alt="${it.title}" class="catalog-model-thumb bg-slate-100" data-category="${it.category || 'shkafy'}" onerror="handleImgError(this, '${it.id}')" />`
           : `<div class="catalog-model-thumb bg-[#f5f5f7] border border-black/[0.04] flex flex-col items-center justify-center text-center p-1.5">
               <span class="text-xl mb-0.5">${getCategoryIcon(it.category, it.type)}</span>
               <span class="text-[9px] font-bold text-[#86868b] line-clamp-1">${it.tag || it.category || 'Мебель'}</span>
@@ -5420,14 +5448,18 @@ function applyImportCode() {
       thumbBox.innerHTML = "";
       if (it.images && it.images.length > 1) {
         it.images.forEach(src => {
+          const cleanSrc = sanitizeAvitoImageUrl(src);
           const t = document.createElement("img");
-          t.src = src;
-          t.className = `rounded-xl object-cover shrink-0 cursor-pointer border transition ${src === calcActivePhoto ? 'border-2 border-[#0071e3] shadow-sm' : 'border-black/[0.08]'}`;
+          t.src = cleanSrc;
+          const isAct = cleanSrc === calcActivePhoto;
+          t.className = `rounded-xl object-cover shrink-0 cursor-pointer border transition ${isAct ? 'border-2 border-[#0071e3] active-thumb' : 'border-black/[0.08]'}`;
           t.onclick = () => {
-            calcActivePhoto = src;
-            document.getElementById("calc_itemImg").src = src;
-            document.querySelectorAll("#calc_itemThumbnails img").forEach(img => img.className = "w-12 h-12 rounded-xl object-cover shrink-0 cursor-pointer border border-black/[0.08]");
-            t.className = "w-12 h-12 rounded-xl object-cover shrink-0 cursor-pointer border border-[#0071e3] ring-2 ring-[#0071e3]/30";
+            calcActivePhoto = cleanSrc;
+            document.getElementById("calc_itemImg").src = cleanSrc;
+            document.querySelectorAll("#calc_itemThumbnails img").forEach(img => {
+              const isCurrent = img.src === cleanSrc;
+              img.className = `rounded-xl object-cover shrink-0 cursor-pointer border transition ${isCurrent ? 'border-2 border-[#0071e3] active-thumb' : 'border-black/[0.08]'}`;
+            });
           };
           thumbBox.appendChild(t);
         });
