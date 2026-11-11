@@ -1,8 +1,8 @@
 window.APP_CONFIG = {
   "productionUrl": "https://mebel-calc.ru",
   "defaultPriceRub": 6000,
-  "lastDeployedAt": "11.11.2026, 16:44:40",
-  "updatedTimestamp": 1794404680946
+  "lastDeployedAt": "12.11.2026, 00:17:53",
+  "updatedTimestamp": 1794431873903
 };
 
 window.WORKSHOPS_DB = {
@@ -1400,7 +1400,7 @@ window.TG_PARTNER_CHATS = [
     "membersText": "8 390 members, 1 048 online",
     "description": "💬 Твой карманный онлайн инструмент для мебельного дела.   https://t.me/tvoimebelshik/354634 https://t.me/sborshikimebeli https://max.ru/join/C-_QJZOGJwleW2hkeLdmvgMY8b6UXG6nt8z0RYNoW1Q  📇 По вопр...",
     "photo": "https://cdn4.telesco.pe/file/rnRT3LyI8Of-do-ORjae8-IJqmFM2tQ_Osix5yB6V9GXV7PZOjwiqf17FRE7CvVYJPEpICJZUG4ZVtAmVEtnGhiPawLBv1P_lpbJjtk1r6dl5Wr99HISsMM0cHTsatbhv98PUCykF4EuAowjJHsvqWjBf2gr4zuHHkPW0p5dtwJXgpMmxJpqzbqPb2xoW3WCy3d1Vse8m7S7czYEcEo2uNrKCYeN0B6L_4LrAZ6ufAjbFpfBIZiY1WkgcrphVNdNTPG_pMntGx-2msIXAGaKBRntwHJHX_sbCvvdadqgIfJFtwUTedjqx4ofwRfqvGhqbKzGynvZ9sB58Ez4r2aUew.jpg",
-    "status": "⚪ Не писал"
+    "status": "🟢 Опубликовал пост / Написал"
   },
   {
     "handle": "avitolog_gorbachev",
