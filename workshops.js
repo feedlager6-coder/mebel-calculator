@@ -1,6 +1,8 @@
 window.APP_CONFIG = {
   "productionUrl": "https://mebel-calc.ru",
-  "defaultPriceRub": 6000
+  "defaultPriceRub": 6000,
+  "lastDeployedAt": "11.11.2026, 14:12:00",
+  "updatedTimestamp": 1794323520000
 };
 
 window.WORKSHOPS_DB = {

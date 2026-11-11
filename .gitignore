@@ -12,10 +12,9 @@ inspect_*.js
 find_*.js
 build_*.js
 apply_*.js
+deploy_selectel*.js
+deploy_vercel*.js
 furniture_svgs.js
-
-deploy_*.js
-server.js
 *.ps1
 *.bat
 *.vbs
