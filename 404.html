@@ -2236,7 +2236,16 @@ html, body {
       return DEFAULT_GITHUB_TOKEN;
     }
 
+        // Очередь (Mutex) для GitHub деплоя: предотвращает 409 Conflict при одновременных кликах
+    let deployMutexQueue = Promise.resolve();
+
     async function deployDirectToGitHub(customToken, onStepCallback) {
+      return deployMutexQueue = deployMutexQueue.catch(() => {}).then(async () => {
+        return await executeDeployDirectToGitHub(customToken, onStepCallback);
+      });
+    }
+
+    async function executeDeployDirectToGitHub(customToken, onStepCallback) {
       const token = (customToken || getActiveGitHubToken()).trim();
       if (!token) throw new Error("GitHub токен не найден");
 
@@ -2554,13 +2563,14 @@ html, body {
         } catch (e) {}
         if (alsoDeploy) {
           await publishToVercelNow();
-        }
-      } else {
-        // На смартфоне: сохраняем напрямую в GitHub (однократно, без повторного деплоя)
-        try {
-          await deployDirectToGitHub();
-        } catch (e) {
-          console.error("Ошибка сохранения в GitHub:", e);
+        }      } else {
+        // На смартфоне сохраняем в GitHub только если явно запрошен деплой (alsoDeploy === true)
+        if (alsoDeploy) {
+          try {
+            await deployDirectToGitHub();
+          } catch (e) {
+            console.error("Ошибка сохранения в GitHub:", e);
+          }
         }
       }
     }
@@ -3296,18 +3306,8 @@ html, body {
         persistWorkshopsLocally(appDb.workshops, false);
       }
 
-      showToast("⏳ Сохранение статуса цеха в GitHub...", 2500);
       renderStats();
-
-      try {
-        await deployDirectToGitHub(null, (step, total, msg) => {
-          showDeployProgressBanner(step, total, (step === 1 ? "⏳ Шаг 1/3: " : step === 2 ? "🚀 Шаг 2/3: " : "✅ Шаг 3/3: ") + msg);
-        });
-        markPendingChanges(false);
-        showToast("✅ Статус цеха успешно сохранен в GitHub!", 4000);
-      } catch (err) {
-        console.warn("Фоновое сохранение статуса цеха:", err.message);
-      }
+      scheduleDebouncedStatusDeploy("Сохранение статуса цеха в GitHub...");
     }
 
     async function updateShopFee(id, newFee) {
@@ -7348,6 +7348,25 @@ const isNone = type === "none" || calcActiveItem.hideBlueprint === true;
           </div>
         `;
       }).join("");
+    }
+
+        // Умный Debounce для CRM-статусов: объединяет быстрые клики по статусам в один аккуратный коммит
+    let statusDebounceTimer = null;
+
+    function scheduleDebouncedStatusDeploy(message = "Сохранение статусов в GitHub...") {
+      if (statusDebounceTimer) clearTimeout(statusDebounceTimer);
+      showToast("⏳ " + message, 2500);
+      statusDebounceTimer = setTimeout(async () => {
+        try {
+          await deployDirectToGitHub(null, (step, total, msg) => {
+            showDeployProgressBanner(step, total, (step === 1 ? "⏳ Шаг 1/3: " : step === 2 ? "🚀 Шаг 2/3: " : "✅ Шаг 3/3: ") + msg);
+          });
+          if (typeof markPendingChanges === "function") markPendingChanges(false);
+          showToast("✅ Статусы успешно сохранены в GitHub!", 4000);
+        } catch (err) {
+          console.warn("Фоновое сохранение статуса:", err.message);
+        }
+      }, 2500); // 2.5 секунды ожидания: если кликнуть 3 статуса подряд, улетит ровно 1 коммит!
     }
 
     async function updatePartnerChatStatus(handle, newStatus) {
