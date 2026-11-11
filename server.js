@@ -809,8 +809,17 @@ const server = http.createServer(async (req, res) => {
       const db = loadDatabase();
       if (body && body.workshops && Object.keys(body.workshops).length > 0) {
         db.workshops = body.workshops;
-        saveDatabase(db.config, db.workshops);
       }
+      if (body && body.config) {
+        db.config = Object.assign(db.config || {}, body.config);
+      }
+      if (body && body.partnerChats && Array.isArray(body.partnerChats)) {
+        db.partnerChats = body.partnerChats;
+      }
+      if (body && body.avitologLeads && Array.isArray(body.avitologLeads)) {
+        db.avitologLeads = body.avitologLeads;
+      }
+      saveDatabase(db.config, db.workshops, db.partnerChats, db.avitologLeads);
 
       // 1. Деплой на GitHub Pages (Основной, 100% бесплатно, 0 блоков в РФ)
       let githubRes = null;

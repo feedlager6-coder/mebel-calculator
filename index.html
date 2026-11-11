@@ -2510,10 +2510,24 @@ html, body {
           new Function("window", wsCode)(sandbox);
           if (sandbox.WORKSHOPS_DB) {
             appDb.workshops = mergeWorkshops(appDb.workshops, sandbox.WORKSHOPS_DB);
-            try { localStorage.setItem("mebel_workshops", JSON.stringify(appDb.workshops)); } catch (e) {}
+            if (sandbox.TG_PARTNER_CHATS) {
+              window.TG_PARTNER_CHATS = sandbox.TG_PARTNER_CHATS;
+              appDb.partnerChats = sandbox.TG_PARTNER_CHATS;
+            }
+            if (sandbox.AVITOLOG_LEADS) {
+              window.AVITOLOG_LEADS = sandbox.AVITOLOG_LEADS;
+              appDb.avitologLeads = sandbox.AVITOLOG_LEADS;
+            }
+            try {
+              localStorage.setItem("mebel_workshops", JSON.stringify(appDb.workshops));
+              localStorage.setItem("mebel_partner_chats", JSON.stringify(appDb.partnerChats));
+              localStorage.setItem("mebel_avitolog_leads", JSON.stringify(appDb.avitologLeads));
+            } catch (e) {}
             renderStats();
             renderCrmList();
-            showToast("✓ База синхронизирована! Всего цехов: " + Object.keys(appDb.workshops).length, 4000);
+            if (typeof renderPartnersSection === "function") renderPartnersSection();
+            if (typeof filterPartnerChats === "function") filterPartnerChats();
+            showToast("✓ База синхронизирована! Всего цехов: " + Object.keys(appDb.workshops).length + ", чатов: " + (appDb.partnerChats || []).length, 4000);
             return;
           }
         }
@@ -2621,6 +2635,12 @@ html, body {
                 localStorage.setItem("mebel_last_deploy_time", appDb.config.lastDeployedAt);
               }
             } catch (e) {}
+
+            // Немедленно перерисовываем все секции актуальными данными из облака
+            if (typeof renderStats === "function") renderStats();
+            if (typeof renderCrmList === "function") renderCrmList();
+            if (typeof renderPartnersSection === "function") renderPartnersSection();
+            if (typeof filterPartnerChats === "function") filterPartnerChats();
             return true;
           }
         } catch (e) {
@@ -2891,7 +2911,13 @@ html, body {
           const res = await fetch("/api/deploy", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ adminKey: "yusup2026", workshops: appDb.workshops, config: appDb.config })
+            body: JSON.stringify({
+              adminKey: "yusup2026",
+              workshops: appDb.workshops,
+              config: appDb.config,
+              partnerChats: appDb.partnerChats,
+              avitologLeads: appDb.avitologLeads
+            })
           });
           const json = await res.json();
           if (!json.ok) throw new Error(json.error || "Ошибка локального деплоя");
@@ -3254,9 +3280,9 @@ html, body {
     }
 
     async function updateShopStatus(id, newStatus) {
-      markPendingChanges(true);
       if (!appDb.workshops[id]) return;
       appDb.workshops[id].status = newStatus;
+      markPendingChanges(true);
 
       if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
         try {
@@ -3270,8 +3296,18 @@ html, body {
         persistWorkshopsLocally(appDb.workshops, false);
       }
 
-      showToast("✓ Статус обновлен локально");
+      showToast("⏳ Сохранение статуса цеха в GitHub...", 2500);
       renderStats();
+
+      try {
+        await deployDirectToGitHub(null, (step, total, msg) => {
+          showDeployProgressBanner(step, total, (step === 1 ? "⏳ Шаг 1/3: " : step === 2 ? "🚀 Шаг 2/3: " : "✅ Шаг 3/3: ") + msg);
+        });
+        markPendingChanges(false);
+        showToast("✅ Статус цеха успешно сохранен в GitHub!", 4000);
+      } catch (err) {
+        console.warn("Фоновое сохранение статуса цеха:", err.message);
+      }
     }
 
     async function updateShopFee(id, newFee) {
@@ -4635,7 +4671,13 @@ html, body {
             await fetch("/api/deploy", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ adminKey: "yusup2026", workshops: appDb.workshops, config: appDb.config })
+              body: JSON.stringify({
+                adminKey: "yusup2026",
+                workshops: appDb.workshops,
+                config: appDb.config,
+                partnerChats: appDb.partnerChats,
+                avitologLeads: appDb.avitologLeads
+              })
             });
           }
           showDeployProgressBanner(3, 3, "✅ Шаг 3/3: Успешно сохранено и запушено в GitHub!");
@@ -7310,25 +7352,37 @@ const isNone = type === "none" || calcActiveItem.hideBlueprint === true;
 
     async function updatePartnerChatStatus(handle, newStatus) {
       if (!appDb.partnerChats) appDb.partnerChats = window.TG_PARTNER_CHATS || [];
-      const found = appDb.partnerChats.find(c => c.handle.toLowerCase() === handle.toLowerCase());
+      const found = appDb.partnerChats.find(c => (c.handle || "").toLowerCase() === (handle || "").toLowerCase());
       if (found) {
         found.status = newStatus;
+        found.updatedAt = new Date().toISOString();
       }
+      window.TG_PARTNER_CHATS = appDb.partnerChats;
       try { localStorage.setItem("mebel_partner_chats", JSON.stringify(appDb.partnerChats)); } catch (e) {}
 
-      showToast("⏳ Сохранение статуса @"+handle+"...", 1500);
+      if (typeof markPendingChanges === "function") markPendingChanges(true);
+
+      showToast("⏳ Сохранение статуса @" + handle + " («" + newStatus + "»)...", 3000);
+
+      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        try {
+          await fetch("/api/chat-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ handle, status: newStatus })
+          });
+        } catch (e) {}
+      }
 
       try {
-        const res = await fetch("/api/chat-status", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ handle, status: newStatus })
+        await deployDirectToGitHub(null, (step, total, msg) => {
+          showDeployProgressBanner(step, total, (step === 1 ? "⏳ Шаг 1/3: " : step === 2 ? "🚀 Шаг 2/3: " : "✅ Шаг 3/3: ") + msg);
         });
-        if (res.ok) {
-          showToast("✅ Статус чата @" + handle + " сохранен: " + newStatus, 3000);
-        }
-      } catch (e) {
-        showToast("✓ Статус сохранен: " + newStatus, 2500);
+        if (typeof markPendingChanges === "function") markPendingChanges(false);
+        showToast("✅ Статус чата @" + handle + " («" + newStatus + "») сохранен в GitHub!", 5000);
+      } catch (err) {
+        console.warn("Фоновое сохранение статуса в GitHub:", err.message);
+        showToast("⚠️ Сохранено локально. Нажмите «Применить и опубликовать» для отправки в облако.", 6000);
       }
     }
 
@@ -7508,9 +7562,13 @@ const isNone = type === "none" || calcActiveItem.hideBlueprint === true;
         found.status = newStatus;
         found.updatedAt = new Date().toISOString().slice(0, 10);
       }
+      window.AVITOLOG_LEADS = appDb.avitologLeads;
       try { localStorage.setItem("mebel_avitolog_leads", JSON.stringify(appDb.avitologLeads)); } catch (e) {}
       renderAvitologLeads();
-      showToast("✓ Статус обновлен: " + newStatus, 2000);
+
+      if (typeof markPendingChanges === "function") markPendingChanges(true);
+
+      showToast("⏳ Сохранение статуса авитолога («" + newStatus + "»)...", 3000);
 
       try {
         await fetch("/api/avitologists", {
@@ -7519,6 +7577,16 @@ const isNone = type === "none" || calcActiveItem.hideBlueprint === true;
           body: JSON.stringify({ id, status: newStatus })
         });
       } catch (e) {}
+
+      try {
+        await deployDirectToGitHub(null, (step, total, msg) => {
+          showDeployProgressBanner(step, total, (step === 1 ? "⏳ Шаг 1/3: " : step === 2 ? "🚀 Шаг 2/3: " : "✅ Шаг 3/3: ") + msg);
+        });
+        if (typeof markPendingChanges === "function") markPendingChanges(false);
+        showToast("✅ Статус авитолога сохранен в GitHub!", 4000);
+      } catch (err) {
+        console.warn("Фоновое сохранение авитолога:", err.message);
+      }
     }
 
     async function deleteAvitologLead(id) {
