@@ -408,6 +408,13 @@ function detectCategoryAndType(title) {
   return { category: "shkafy", type: "wardrobe", tag: "Корпусная мебель", unit: "м²", hideBlueprint: false, priceDefault: 14500 };
 }
 
+function sanitizeAvitoImageUrl(url) {
+  if (typeof url !== "string") return "";
+  let clean = url.trim();
+  clean = clean.replace(/^(https?:\/\/)[a-zA-Z]+(\d{2}\.img\.avito\.st)/i, "$1$2");
+  return clean;
+}
+
 function isLegitPhotoUrl(u) {
   if (!u || typeof u !== "string" || !u.startsWith("http")) return false;
   const s = u.toLowerCase();
@@ -458,13 +465,13 @@ function smartProcessAvitoItems(rawItems) {
     if (seenSignatures.has(sig)) continue;
     seenSignatures.add(sig);
 
-    let img = it.image || it.img || it.photo || "";
+    let img = sanitizeAvitoImageUrl(it.image || it.img || it.photo || "");
     if (!img || !isLegitPhotoUrl(img)) {
       img = defaultPhotos[catInfo.category] || defaultPhotos.shkafy;
     }
 
     const rawImgList = Array.isArray(it.images) ? it.images : [img];
-    const cleanImgList = rawImgList.filter(isLegitPhotoUrl);
+    const cleanImgList = rawImgList.map(sanitizeAvitoImageUrl).filter(isLegitPhotoUrl);
     if (cleanImgList.length === 0) cleanImgList.push(img);
 
     let baseRate = 14500;
