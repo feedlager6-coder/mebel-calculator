@@ -848,7 +848,7 @@ html, body {
 
         <div class="flex items-center justify-between flex-wrap gap-2 pt-1 border-t border-blue-200/50">
           <div class="text-[11px] text-[#86868b]">
-            Webhook URL: <span class="font-mono text-[#0071e3]">https://mebel-calc.ru/api/avito-webhook?shop=...</span>
+            Webhook URL: <span class="font-mono text-[#0071e3]">https://functions.yandexcloud.net/d4eo5q0v176lqeamumpn?shop=...</span>
           </div>
           <button type="button" onclick="registerAvitoWebhook()" class="bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-bold py-2 px-4 rounded-xl transition shadow-2xs flex items-center gap-1.5 cursor-pointer">
             <span>🔗 Привязать Webhook к Авито</span>
@@ -3425,7 +3425,11 @@ html, body {
 
       showToast("⏳ Подключение к Avito API и привязка Webhook...");
       try {
-        const res = await fetch("/api/avito-register-webhook", {
+        const gatewayUrl = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+          ? "/api/avito-register-webhook"
+          : "https://functions.yandexcloud.net/d4eo5q0v176lqeamumpn?action=register";
+
+        const res = await fetch(gatewayUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
