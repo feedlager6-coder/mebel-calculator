@@ -1,8 +1,8 @@
 window.APP_CONFIG = {
   "productionUrl": "https://mebel-calc.ru",
   "defaultPriceRub": 6000,
-  "lastDeployedAt": "11.11.2026, 16:44:40",
-  "updatedTimestamp": 1794404680946
+  "lastDeployedAt": "12.11.2026, 19:57:54",
+  "updatedTimestamp": 1794502674201
 };
 
 window.WORKSHOPS_DB = {
@@ -1437,7 +1437,8 @@ window.TG_PARTNER_CHATS = [
     "membersText": "7 134 members, 904 online",
     "description": "Чат создан для общения мебельщиков.  💰Заказать рекламу: @uma_admins  🚀 Поддержка: @uma_moderator  📌 300 ТОП чатов: https://umatg.ru/vse-chati/ 📌 Визитка: @Umaabout_bot 📌 Бот для развития в TG:...",
     "photo": "https://cdn4.telesco.pe/file/ZMmW43j0B7Ws5A6L9VCUiT8-f5oTL2Pex0pVxwTzEBJIGwYoV6KyRpWq4Y04W1H6zfIqDXzYIGVfKgbzNY2YILZ3eON4H92jiyfI2_uL-SRE8pBtwj0nCqFEeZEmzLztHGB8OOHzWXfixEr29nhnRWKkR6iSWYWcLKN3LENvaBBHGlKXV6StCPIOLnIMUbXxPmiLYOQEyn58rjwnS0XvzcdaRoYnbCJtpf9WpXQi75A-m_TFUsgKSswfHHGERZtoFxaJdXFJmqOYMsmEYdK_h43di8i_-XKlo-pkL17nsTFUyiRY2IzxdMis1COKaqbGruUKuHbFiOwjdfWFry_srg.jpg",
-    "status": "⚪ Не писал"
+    "status": "🟡 Вступил / Наблюдаю",
+    "updatedAt": "2026-11-12T16:57:54.195Z"
   },
   {
     "handle": "bazis_FREE",
